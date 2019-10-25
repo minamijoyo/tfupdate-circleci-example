@@ -14,6 +14,11 @@ jobs:
           command: |
             tfupdate --version
       - run:
+          name: Setup git config
+          command: |
+            git config --local user.name 'tfupdate-circleci'
+            git config --local user.email 'minamijoyo+tfupdate-circleci@gmail.com'
+      - run:
           name: Update terraform to latest
           command: |
             tfupdate terraform ./
