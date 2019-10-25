@@ -10,10 +10,17 @@ jobs:
     steps:
       - checkout
       - run:
-          name:
+          name: Show tfupdate version
           command: |
             tfupdate --version
-
+      - run:
+          name: Update terraform to latest
+          command: |
+            tfupdate terraform ./
+      - run:
+          name: Check git diff
+          command: |
+            git diff
 
 workflows:
   version: 2
