@@ -21,11 +21,12 @@ jobs:
       - run:
           name: Update terraform to latest
           command: |
-            tfupdate terraform ./
-      - run:
-          name: Check git diff
-          command: |
-            git diff
+            VERSION=$(tfupdate release latest hashicorp/terraform)
+            echo "Update terraform to v${VERSION}"
+            git checkout -b update-terraform-to-v${VERSION}
+            tfupdate terraform -v ${VERSION} ./
+            git add . && git diff --cached --exit-code --quiet || git commit -m "Update terraform to v${VERSION}"
+            git show
 
 workflows:
   version: 2
