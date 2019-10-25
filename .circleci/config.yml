@@ -1,0 +1,22 @@
+version: 2.1
+executors:
+  tfupdate:
+    docker:
+      - image: minamijoyo/tfupdate:latest
+
+jobs:
+  tfupdate_terraform:
+    executor: tfupdate
+    steps:
+      - checkout
+      - run:
+          name:
+          command: |
+            tfupdate --version
+
+
+workflows:
+  version: 2
+  update:
+    jobs:
+      - tfupdate_terraform
