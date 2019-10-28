@@ -18,6 +18,7 @@ jobs:
           command: |
             git config --local user.name 'tfupdate-circleci'
             git config --local user.email 'minamijoyo+tfupdate-circleci@gmail.com'
+            mkdir -p $HOME/.config
             echo "https://${GITHUB_TOKEN}:@github.com" > $HOME/.config/git-credential
             git config --local credential.helper "store --file=$HOME/.config/git-credential"
       - run:
