@@ -27,6 +27,8 @@ jobs:
             tfupdate terraform -v ${VERSION} ./
             git add . && git diff --cached --exit-code --quiet || git commit -m "Update terraform to v${VERSION}"
             git show
+            git push origin HEAD
+            hub pull-request -m "Update terraform to v${VERSION}"
 
 workflows:
   version: 2
