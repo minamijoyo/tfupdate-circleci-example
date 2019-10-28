@@ -14,14 +14,17 @@ jobs:
           command: |
             tfupdate --version
       - run:
-          name: Update terraform to latest
+          name: Setup git config
           command: |
             git config --local user.name 'tfupdate-circleci'
             git config --local user.email 'minamijoyo+tfupdate-circleci@gmail.com'
             mkdir -p $HOME/.config
             echo "https://${GITHUB_TOKEN}:@github.com" > $HOME/.config/git-credential
             git config --local credential.helper "store --file=$HOME/.config/git-credential"
-
+            git config --local url."https://github.com/".insteadOf 'git@github.com:'
+      - run:
+          name: Update terraform to latest
+          command: |
             VERSION=$(tfupdate release latest hashicorp/terraform)
             UPDATE_MESSAGE="Update terraform to v${VERSION}"
             git checkout -b update-terraform-to-v${VERSION}
