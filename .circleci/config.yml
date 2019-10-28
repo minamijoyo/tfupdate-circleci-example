@@ -30,7 +30,7 @@ jobs:
             git checkout -b update-terraform-to-v${VERSION}
             tfupdate terraform -v ${VERSION} ./
             git add . && git diff --cached --exit-code --quiet || git commit -m "$UPDATE_MESSAGE"
-            hub pr list -f "%t" | grep "$UPDATE_MESSAGE" || (git push origin HEAD && hub pull-request -m "UPDATE_MESSAGE")
+            hub pr list -f "%t" | grep "$UPDATE_MESSAGE" || (git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE")
 
 workflows:
   version: 2
