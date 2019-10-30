@@ -45,7 +45,7 @@ commands:
           command: |
             VERSION=$(tfupdate release latest hashicorp/terraform)
             UPDATE_MESSAGE="[tfupdate] Update terraform to v${VERSION}"
-            if hub pr list -f "%t: %U" | grep -F "$UPDATE_MESSAGE"; then
+            if hub pr list -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
               echo "A pull request already exists"
             else
               git checkout -b update-terraform-to-v${VERSION} << parameters.base_branch >>
@@ -77,7 +77,7 @@ commands:
           command: |
             VERSION=$(tfupdate release latest terraform-providers/terraform-provider-<< parameters.provider_name >>)
             UPDATE_MESSAGE="[tfupdate] Update terraform-provider-<< parameters.provider_name >> to v${VERSION}"
-            if hub pr list -f "%t: %U" | grep -F "$UPDATE_MESSAGE"; then
+            if hub pr list -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
               echo "A pull request already exists"
             else
               git checkout -b update-terraform-provider-<< parameters.provider_name >>-to-v${VERSION} << parameters.base_branch >>
