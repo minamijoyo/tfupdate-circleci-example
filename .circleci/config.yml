@@ -28,19 +28,9 @@ commands:
             echo "https://${<< parameters.github_token >>}:@github.com" > $HOME/.config/git-credential
             git config --local credential.helper "store --file=$HOME/.config/git-credential"
             git config --local url."https://github.com/".insteadOf 'git@github.com:'
-
-jobs:
   tfupdate_terraform:
-    executor: tfupdate
+    description: Update terraform to latest
     steps:
-      - checkout
-      - run:
-          name: Show tfupdate version
-          command: |
-            tfupdate --version
-      - git_config:
-          user_name: 'tfupdate-circleci'
-          user_email: 'minamijoyo+tfupdate-circleci@gmail.com'
       - run:
           name: Update terraform to latest
           command: |
@@ -51,8 +41,19 @@ jobs:
             git add . && git diff --cached --exit-code --quiet || git commit -m "$UPDATE_MESSAGE"
             hub pr list -f "%t" | grep "$UPDATE_MESSAGE" || (git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE")
 
+jobs:
+  tfupdate:
+    executor: tfupdate
+    steps:
+      - checkout
+      - run: tfupdate --version
+      - git_config:
+          user_name: 'tfupdate-circleci'
+          user_email: 'minamijoyo+tfupdate-circleci@gmail.com'
+      - tfupdate_terraform
+
 workflows:
   version: 2
   update:
     jobs:
-      - tfupdate_terraform
+      - tfupdate
