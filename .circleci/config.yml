@@ -36,7 +36,7 @@ commands:
           command: |
             VERSION=$(tfupdate release latest hashicorp/terraform)
             UPDATE_MESSAGE="Update terraform to v${VERSION}"
-            if hub pr list -f "%t" | grep "$UPDATE_MESSAGE"; then
+            if hub pr list -f "%t: %U" | grep "$UPDATE_MESSAGE"; then
               echo "A pull request already exists"
             else
               git checkout -b update-terraform-to-v${VERSION}
