@@ -105,6 +105,13 @@ jobs:
 
 workflows:
   version: 2
-  update:
+  schedule:
     jobs:
       - tfupdate
+    triggers:
+      - schedule:
+          cron: "12 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
