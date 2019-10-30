@@ -29,7 +29,7 @@ commands:
             git config --local credential.helper "store --file=$HOME/.config/git-credential"
             git config --local url."https://github.com/".insteadOf 'git@github.com:'
   tfupdate_terraform:
-    description: Update terraform to latest
+    description: Update the terraform to latest
     parameters:
       args:
         description: Arguments for tfupdate command
@@ -37,7 +37,7 @@ commands:
         default: ./
     steps:
       - run:
-          name: Update terraform to latest
+          name: Update the terraform to latest
           command: |
             VERSION=$(tfupdate release latest hashicorp/terraform)
             UPDATE_MESSAGE="Update terraform to v${VERSION}"
@@ -46,6 +46,34 @@ commands:
             else
               git checkout -b update-terraform-to-v${VERSION}
               tfupdate terraform -v ${VERSION} << parameters.args >>
+              if git add . && git diff --cached --exit-code --quiet; then
+                echo "No changes"
+              else
+                git commit -m "$UPDATE_MESSAGE"
+                git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE"
+              fi
+            fi
+  tfupdate_provider:
+    description: Update a provider to latest
+    parameters:
+      args:
+        description: Arguments for tfupdate command
+        type: string
+        default: ./
+      provider_name:
+        description: A name of provider
+        type: string
+    steps:
+      - run:
+          name: Update a provider to latest
+          command: |
+            VERSION=$(tfupdate release latest terraform-providers/terraform-provider-<< parameters.provider_name >>)
+            UPDATE_MESSAGE="Update terraform-provider-<< parameters.provider_name >> to v${VERSION}"
+            if hub pr list -f "%t: %U" | grep "$UPDATE_MESSAGE"; then
+              echo "A pull request already exists"
+            else
+              git checkout -b update-terraform-provider-<< parameters.provider_name >>-to-v${VERSION}
+              tfupdate provider << parameters.provider_name >> -v ${VERSION} << parameters.args >>
               if git add . && git diff --cached --exit-code --quiet; then
                 echo "No changes"
               else
@@ -64,6 +92,8 @@ jobs:
           user_name: 'tfupdate-circleci'
           user_email: 'minamijoyo+tfupdate-circleci@gmail.com'
       - tfupdate_terraform
+      - tfupdate_provider:
+          provider_name: 'aws'
 
 workflows:
   version: 2
