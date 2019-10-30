@@ -110,7 +110,7 @@ workflows:
       - tfupdate
     triggers:
       - schedule:
-          cron: "23 14 * * *"
+          cron: "0 0 * * *"  # minute hour day month week (UTC)
           filters:
             branches:
               only:
