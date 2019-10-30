@@ -105,13 +105,20 @@ jobs:
 
 workflows:
   version: 2
-  schedule:
+  scheduled:
     jobs:
       - tfupdate
     triggers:
       - schedule:
-          cron: "12 0 * * *"
+          cron: "20 * * * *"
           filters:
             branches:
               only:
                 - master
+  tfupdate_test:
+    jobs:
+      - tfupdate:
+          filters:
+            branches:
+              only:
+                - /tfupdate-test-.*/
