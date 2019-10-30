@@ -110,7 +110,7 @@ workflows:
       - tfupdate
     triggers:
       - schedule:
-          cron: "20 * * * *"
+          cron: "23 14 * * *"
           filters:
             branches:
               only:
