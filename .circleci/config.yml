@@ -4,6 +4,31 @@ executors:
     docker:
       - image: minamijoyo/tfupdate:latest
 
+commands:
+  git_config:
+    description: Setup git config
+    parameters:
+      user_name:
+        description: git user name
+        type: string
+      user_email:
+        description: git user email
+        type: string
+      github_token:
+        description: environment variable name for GitHub access token
+        type: env_var_name
+        default: GITHUB_TOKEN
+    steps:
+      - run:
+          name: Setup git config
+          command: |
+            git config --local user.name << parameters.user_name >>
+            git config --local user.email << parameters.user_email >>
+            mkdir -p $HOME/.config
+            echo "https://${<< parameters.github_token >>}:@github.com" > $HOME/.config/git-credential
+            git config --local credential.helper "store --file=$HOME/.config/git-credential"
+            git config --local url."https://github.com/".insteadOf 'git@github.com:'
+
 jobs:
   tfupdate_terraform:
     executor: tfupdate
@@ -13,15 +38,9 @@ jobs:
           name: Show tfupdate version
           command: |
             tfupdate --version
-      - run:
-          name: Setup git config
-          command: |
-            git config --local user.name 'tfupdate-circleci'
-            git config --local user.email 'minamijoyo+tfupdate-circleci@gmail.com'
-            mkdir -p $HOME/.config
-            echo "https://${GITHUB_TOKEN}:@github.com" > $HOME/.config/git-credential
-            git config --local credential.helper "store --file=$HOME/.config/git-credential"
-            git config --local url."https://github.com/".insteadOf 'git@github.com:'
+      - git_config:
+          user_name: 'tfupdate-circleci'
+          user_email: 'minamijoyo+tfupdate-circleci@gmail.com'
       - run:
           name: Update terraform to latest
           command: |
