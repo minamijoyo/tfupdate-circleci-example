@@ -30,6 +30,11 @@ commands:
             git config --local url."https://github.com/".insteadOf 'git@github.com:'
   tfupdate_terraform:
     description: Update terraform to latest
+    parameters:
+      args:
+        description: Arguments for tfupdate command
+        type: string
+        default: ./
     steps:
       - run:
           name: Update terraform to latest
@@ -40,7 +45,7 @@ commands:
               echo "A pull request already exists"
             else
               git checkout -b update-terraform-to-v${VERSION}
-              tfupdate terraform -v ${VERSION} ./
+              tfupdate terraform -v ${VERSION} << parameters.args >>
               if git add . && git diff --cached --exit-code --quiet; then
                 echo "No changes"
               else
