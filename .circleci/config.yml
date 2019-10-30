@@ -37,7 +37,7 @@ commands:
         default: ./
     steps:
       - run:
-          name: Update the terraform to latest
+          name: Update terraform to latest
           command: |
             VERSION=$(tfupdate release latest hashicorp/terraform)
             UPDATE_MESSAGE="[tfupdate] Update terraform to v${VERSION}"
@@ -65,7 +65,7 @@ commands:
         type: string
     steps:
       - run:
-          name: Update a provider to latest
+          name: Update terraform-provider-<< parameters.provider_name >> to latest
           command: |
             VERSION=$(tfupdate release latest terraform-providers/terraform-provider-<< parameters.provider_name >>)
             UPDATE_MESSAGE="[tfupdate] Update terraform-provider-<< parameters.provider_name >> to v${VERSION}"
