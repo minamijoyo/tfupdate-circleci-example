@@ -34,7 +34,7 @@ commands:
       args:
         description: Arguments for tfupdate command
         type: string
-        default: ./
+        default: "-r ./"
       base_branch:
         description: A base branch name to update
         type: string
@@ -63,7 +63,7 @@ commands:
       args:
         description: Arguments for tfupdate command
         type: string
-        default: ./
+        default: "-r ./"
       base_branch:
         description: A base branch name to update
         type: string
