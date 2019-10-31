@@ -54,7 +54,8 @@ commands:
                 echo "No changes"
               else
                 git commit -m "$UPDATE_MESSAGE"
-                git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -b << parameters.base_branch >>
+                PULL_REQUEST_BODY="For details see: https://github.com/hashicorp/terraform/releases"
+                git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PULL_REQUEST_BODY" -b << parameters.base_branch >>
               fi
             fi
   tfupdate_provider:
@@ -86,7 +87,8 @@ commands:
                 echo "No changes"
               else
                 git commit -m "$UPDATE_MESSAGE"
-                git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -b << parameters.base_branch >>
+                PULL_REQUEST_BODY="For details see: https://github.com/terraform-providers/terraform-provider-<< parameters.provider_name >>/releases"
+                git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PULL_REQUEST_BODY" -b << parameters.base_branch >>
               fi
             fi
 
