@@ -48,13 +48,13 @@ commands:
             if hub pr list -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
               echo "A pull request already exists"
             else
-              git checkout -b update-terraform-to-v${VERSION} << parameters.base_branch >>
+              git checkout -b update-terraform-to-v${VERSION} origin/<< parameters.base_branch >>
               tfupdate terraform -v ${VERSION} << parameters.args >>
               if git add . && git diff --cached --exit-code --quiet; then
                 echo "No changes"
               else
                 git commit -m "$UPDATE_MESSAGE"
-                git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -b  << parameters.base_branch >>
+                git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -b << parameters.base_branch >>
               fi
             fi
   tfupdate_provider:
@@ -80,13 +80,13 @@ commands:
             if hub pr list -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
               echo "A pull request already exists"
             else
-              git checkout -b update-terraform-provider-<< parameters.provider_name >>-to-v${VERSION} << parameters.base_branch >>
+              git checkout -b update-terraform-provider-<< parameters.provider_name >>-to-v${VERSION} origin/<< parameters.base_branch >>
               tfupdate provider << parameters.provider_name >> -v ${VERSION} << parameters.args >>
               if git add . && git diff --cached --exit-code --quiet; then
                 echo "No changes"
               else
                 git commit -m "$UPDATE_MESSAGE"
-                git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -b  << parameters.base_branch >>
+                git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -b << parameters.base_branch >>
               fi
             fi
 
