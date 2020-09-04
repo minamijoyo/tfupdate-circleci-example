@@ -3,5 +3,5 @@ terraform {
 }
 
 provider "aws" {
-  version = "2.35.0"
+  version = "3.5.0"
 }
