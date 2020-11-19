@@ -74,6 +74,10 @@ commands:
       provider_name:
         description: A name of provider
         type: string
+      terraform_version:
+        description: A version of terraform command for updating a lock file
+        type: string
+        default: latest
     steps:
       - run:
           name: Update terraform-provider-<< parameters.provider_name >> to latest
@@ -87,6 +91,31 @@ commands:
             else
               git checkout -b update-terraform-provider-<< parameters.provider_name >>-to-v${VERSION} origin/<< parameters.base_branch >>
               tfupdate provider << parameters.provider_name >> -v ${VERSION} << parameters.args >>
+
+              # install terraform
+              TERRAFORM_VERSION=<< parameters.terraform_version >>
+              if [ "${TERRAFORM_VERSION}" = "latest" ]; then
+                TERRAFORM_VERSION=$(tfupdate release latest hashicorp/terraform)
+              fi
+              wget -qO- https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip | unzip -d /bin - && chmod +x /bin/terraform
+              terraform version
+
+              # update the lock file
+              ALL_DIRS=$(find . -type f -name '*.tf' | xargs -I {} dirname {} | grep -v 'modules/')
+              for dir in ${ALL_DIRS}
+              do
+                pushd "$dir"
+                # update h1 on the current platform
+                terraform init -upgrade -input=false -no-color -backend=false
+                # ensure generate zh
+                # note that terraform init -upgrade doesn't generate zh if the plugin was installed from plugin_cache_dir and terraform providers lock -platform fails with a checksum mismatch if zh doesn't exist.
+                terraform providers lock
+                # generate h1 for other platforms
+                terraform providers lock -platform=linux_amd64 -platform=darwin_amd64
+                rm -rf .terraform
+                popd
+              done
+
               if git add . && git diff --cached --exit-code --quiet; then
                 echo "No changes"
               else
@@ -108,6 +137,8 @@ jobs:
       - tfupdate_terraform
       - tfupdate_provider:
           provider_name: 'aws'
+          terraform_version: '0.14.0-beta2'
+          base_branch: "tfupdate-test-for-v0.14"
 
 workflows:
   version: 2
