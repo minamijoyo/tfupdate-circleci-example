@@ -113,11 +113,11 @@ commands:
               for dir in ${ALL_DIRS}
               do
                 pushd "$dir"
-                # update h1 on the current platform and zh for all platforms
-                terraform init -upgrade -input=false -no-color -backend=false
-                # generate h1 for all platforms you need
+                # always create a new lock to avoid duplicate downloads by terraoform init -upgrade
+                rm -f .terraform.lock.hcl
+                # generate h1 hashes for all platforms you need
+                # recording zh hashes requires to download from origin, so we intentionally ignore them.
                 terraform providers lock -fs-mirror="${FS_MIRROR}" -platform=linux_amd64 -platform=darwin_amd64
-                rm -rf .terraform
                 popd
               done
 
