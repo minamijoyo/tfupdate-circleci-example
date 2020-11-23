@@ -100,9 +100,26 @@ commands:
               wget -qO- https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip | unzip -d /bin - && chmod +x /bin/terraform
               terraform version
 
+              # create a local filesystem mirror to avoid duplicate downloads
+              FS_MIRROR="/tmp/terraform.d/plugins"
+              DOWNLOAD_DIR="${FS_MIRROR}"/registry.terraform.io/hashicorp/<< parameters.provider_name >>
+              DOWNLOAD_URL_PREFIX=https://releases.hashicorp.com/terraform-provider-<< parameters.provider_name >>/"${VERSION}"/terraform-provider-<< parameters.provider_name >>_"${VERSION}"
+              mkdir -p "${DOWNLOAD_DIR}"
+              wget -P "${DOWNLOAD_DIR}" "${DOWNLOAD_URL_PREFIX}_linux_amd64.zip"
+              wget -P "${DOWNLOAD_DIR}" "${DOWNLOAD_URL_PREFIX}_darwin_amd64.zip"
+
               # update the lock file
-              find . -type f -name '*.tf' | xargs -I {} dirname {} | grep -v 'modules/' \
-                | xargs -I {} sh -c "rm -f {}/.terraform.lock.hcl && terraform -chdir={} providers lock -platform=linux_amd64 -platform=darwin_amd64"
+              ALL_DIRS=$(find . -type f -name '*.tf' | xargs -I {} dirname {} | grep -v 'modules/')
+              for dir in ${ALL_DIRS}
+              do
+                pushd "$dir"
+                # update h1 on the current platform and zh for all platforms
+                terraform init -upgrade -input=false -no-color -backend=false
+                # generate h1 for all platforms you need
+                terraform providers lock -fs-mirror="${FS_MIRROR}" -platform=linux_amd64 -platform=darwin_amd64
+                rm -rf .terraform
+                popd
+              done
 
               if git add . && git diff --cached --exit-code --quiet; then
                 echo "No changes"
