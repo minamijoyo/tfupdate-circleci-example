@@ -102,11 +102,7 @@ commands:
 
               # create a local filesystem mirror to avoid duplicate downloads
               FS_MIRROR="/tmp/terraform.d/plugins"
-              DOWNLOAD_DIR="${FS_MIRROR}"/registry.terraform.io/hashicorp/<< parameters.provider_name >>
-              DOWNLOAD_URL_PREFIX=https://releases.hashicorp.com/terraform-provider-<< parameters.provider_name >>/"${VERSION}"/terraform-provider-<< parameters.provider_name >>_"${VERSION}"
-              mkdir -p "${DOWNLOAD_DIR}"
-              wget -P "${DOWNLOAD_DIR}" "${DOWNLOAD_URL_PREFIX}_linux_amd64.zip"
-              wget -P "${DOWNLOAD_DIR}" "${DOWNLOAD_URL_PREFIX}_darwin_amd64.zip"
+              terraform providers mirror -platform=linux_amd64 -platform=darwin_amd64 "${FS_MIRROR}"
 
               # update the lock file
               ALL_DIRS=$(find . -type f -name '*.tf' | xargs -I {} dirname {} | grep -v 'modules/')
