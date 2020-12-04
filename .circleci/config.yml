@@ -139,7 +139,6 @@ jobs:
       - tfupdate_provider:
           provider_name: 'aws'
           terraform_version: '0.14.0'
-          base_branch: "tfupdate-test-for-v0.14"
 
 workflows:
   version: 2
