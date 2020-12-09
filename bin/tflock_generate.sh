@@ -6,7 +6,7 @@ FS_MIRROR="/tmp/terraform.d/plugins"
 terraform providers mirror -platform=linux_amd64 -platform=darwin_amd64 "${FS_MIRROR}"
 
 # update the lock file
-ALL_DIRS=$(find . -type f -name '*.tf' | xargs -I {} dirname {} | grep -v 'modules/')
+ALL_DIRS=$(find . -type f -name '*.tf' | xargs -I {} dirname {} | sort | uniq | grep -v 'modules/')
 for dir in ${ALL_DIRS}
 do
   pushd "$dir"
