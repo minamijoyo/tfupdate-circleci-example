@@ -52,6 +52,10 @@ commands:
             else
               git checkout -b update-terraform-to-v${VERSION} origin/<< parameters.base_branch >>
               tfupdate terraform -v ${VERSION} << parameters.args >>
+
+              # update CircleCI (tfupdate_provider)
+              sed -i -E "s#terraform_version: \'[0-9]+(\.[0-9]+)*(-.*)*\'#terraform_version: \'$VERSION\'#" .circleci/config.yml
+
               if git add . && git diff --cached --exit-code --quiet; then
                 echo "No changes"
               else
