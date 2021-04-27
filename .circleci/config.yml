@@ -128,7 +128,7 @@ jobs:
       - tfupdate_terraform
       - tfupdate_provider:
           provider_name: 'aws'
-          terraform_version: '0.14.0'
+          terraform_version: '0.11.15'
 
 workflows:
   version: 2
