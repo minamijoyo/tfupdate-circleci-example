@@ -5,7 +5,57 @@ executors:
       - image: minamijoyo/tfupdate:latest
 
 commands:
-  git_config:
+  generate_github_app_token:
+    description: Generate github app token
+    parameters:
+      github_app_name:
+        description: environment variable name for GitHub App name
+        type: env_var_name
+        default: GITHUB_APP_NAME
+      github_app_id:
+        description: environment variable name for GitHub App ID
+        type: env_var_name
+        default: GITHUB_APP_ID
+      github_app_private_key:
+        description: environment variable name for GitHub App private key
+        type: env_var_name
+        default: GITHUB_APP_PRIVATE_KEY
+    steps:
+      - run:
+          name: Generate github app token
+          command: |
+            export APP_ID="${<< parameters.github_app_id >>}"
+            export APP_SECRET=$(echo "${<< parameters.github_app_private_key >>}" | sed 's/\\n/\n/g')
+            export GH_REPO=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+            GITHUB_TOKEN=$(bin/get_github_app_token.sh)
+            echo "export GITHUB_TOKEN=$GITHUB_TOKEN" >> $BASH_ENV
+            # The hub command requires to set $GITHUB_USER explicitly.
+            echo "export GITHUB_USER=${<< parameters.github_app_name >>}" >> $BASH_ENV
+
+  git_config_for_app:
+    description: Setup git config
+    parameters:
+      user_name:
+        description: git user name
+        type: string
+      user_email:
+        description: git user email
+        type: string
+    steps:
+      # At the time of this writing, the official GitHub App documentation
+      # indicates to use a password authentication for git operations,
+      # but this method has already been removed.
+      # Use a deploy key with write permission instead.
+      # https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#http-based-git-access-by-an-installation
+      # https://github.blog/2020-12-15-token-authentication-requirements-for-git-operations/
+      # https://circleci.com/docs/add-ssh-key
+      - run:
+          name: Setup git config
+          command: |
+            git config --local user.name << parameters.user_name >>
+            git config --local user.email << parameters.user_email >>
+
+  git_config_for_pat:
     description: Setup git config
     parameters:
       user_name:
@@ -28,6 +78,7 @@ commands:
             echo "https://${<< parameters.github_token >>}:@github.com" > $HOME/.config/git-credential
             git config --local credential.helper "store --file=$HOME/.config/git-credential"
             git config --local url."https://github.com/".insteadOf 'git@github.com:'
+
   tfupdate_terraform:
     description: Update the terraform to latest
     parameters:
@@ -64,6 +115,7 @@ commands:
                 git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PULL_REQUEST_BODY" -b << parameters.base_branch >>
               fi
             fi
+
   tfupdate_provider:
     description: Update a provider to latest
     parameters:
@@ -122,9 +174,18 @@ jobs:
     steps:
       - checkout
       - run: tfupdate --version
-      - git_config:
-          user_name: 'tfupdate-circleci'
+      # For GitHub App, set the followings via environment variable and use a write deploy key.
+      # - GITHUB_APP_NAME
+      # - GITHUB_APP_ID
+      # - GITHUB_APP_PRIVATE_KEY
+      - generate_github_app_token
+      - git_config_for_app:
+          user_name: "$GITHUB_APP_NAME"
           user_email: 'minamijoyo+tfupdate-circleci@gmail.com'
+      # For GitHub PAT, set your GITHUB_TOKEN via environment variable.
+      # - git_config_for_pat:
+      #     user_name: 'tfupdate-circleci'
+      #     user_email: 'minamijoyo+tfupdate-circleci@gmail.com'
       - tfupdate_terraform
       - tfupdate_provider:
           provider_name: 'aws'
