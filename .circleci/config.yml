@@ -190,7 +190,7 @@ jobs:
           base_branch: tfupdate-providers-mirror-issue
       - tfupdate_provider:
           provider_name: 'aws'
-          terraform_version: '1.4.1'
+          terraform_version: '1.4.6'
           base_branch: tfupdate-providers-mirror-issue
 
 workflows:
