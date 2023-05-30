@@ -186,10 +186,12 @@ jobs:
       # - git_config_for_pat:
       #     user_name: 'tfupdate-circleci'
       #     user_email: 'minamijoyo+tfupdate-circleci@gmail.com'
-      - tfupdate_terraform
+      - tfupdate_terraform:
+          base_branch: tfupdate-providers-mirror-issue
       - tfupdate_provider:
           provider_name: 'aws'
           terraform_version: '1.4.1'
+          base_branch: tfupdate-providers-mirror-issue
 
 workflows:
   version: 2
