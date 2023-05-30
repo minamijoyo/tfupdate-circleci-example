@@ -194,16 +194,26 @@ jobs:
 workflows:
   version: 2
   scheduled:
+    # Scheduled pipelines
+    # https://circleci.com/docs/scheduled-pipelines/
+    when:
+      and:
+        - equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
+        - equal: [ "tfupdate daily", << pipeline.schedule.name >> ]
+    # Equivalent to the following settings in the legacy scheduled workflow
+    # triggers:
+    #   - schedule:
+    #       cron: "0 0 * * *"  # minute hour day month week (UTC)
+    #       filters:
+    #         branches:
+    #           only:
+    #             - master
     jobs:
       - tfupdate
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"  # minute hour day month week (UTC)
-          filters:
-            branches:
-              only:
-                - master
   tfupdate_test:
+    when:
+      not:
+        equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
     jobs:
       - tfupdate:
           filters:
