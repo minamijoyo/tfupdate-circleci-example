@@ -5,6 +5,9 @@ set -eo pipefail
 export TF_PLUGIN_CACHE_DIR="/tmp/terraform.d/plugin-cache"
 mkdir -p "${TF_PLUGIN_CACHE_DIR}"
 
+# remove an old lock file before providers mirror command
+rm -f .terraform.lock.hcl
+
 # create a local filesystem mirror to avoid duplicate downloads
 FS_MIRROR="/tmp/terraform.d/plugins"
 terraform providers mirror -platform=linux_amd64 -platform=darwin_amd64 "${FS_MIRROR}"
