@@ -104,9 +104,6 @@ commands:
               git checkout -b update-terraform-to-v${VERSION} origin/<< parameters.base_branch >>
               tfupdate terraform -v ${VERSION} << parameters.args >>
 
-              # update CircleCI (tfupdate_provider)
-              sed -i -E "s#terraform_version: \'[0-9]+(\.[0-9]+)*(-.*)*\'#terraform_version: \'$VERSION\'#" .circleci/config.yml
-
               if git add . && git diff --cached --exit-code --quiet; then
                 echo "No changes"
               else
@@ -130,10 +127,6 @@ commands:
       provider_name:
         description: A name of provider
         type: string
-      terraform_version:
-        description: A version of terraform command for updating a lock file
-        type: string
-        default: latest
     steps:
       - run:
           name: Update terraform-provider-<< parameters.provider_name >> to latest
@@ -148,16 +141,8 @@ commands:
               git checkout -b update-terraform-provider-<< parameters.provider_name >>-to-v${VERSION} origin/<< parameters.base_branch >>
               tfupdate provider << parameters.provider_name >> -v ${VERSION} << parameters.args >>
 
-              # install terraform
-              TERRAFORM_VERSION=<< parameters.terraform_version >>
-              if [ "${TERRAFORM_VERSION}" = "latest" ]; then
-                TERRAFORM_VERSION=$(tfupdate release latest hashicorp/terraform)
-              fi
-              wget -q -O terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && unzip -d /bin terraform.zip && rm terraform.zip && chmod +x /bin/terraform
-              terraform version
-
-              # generate .terraform.lock.hcl
-              bin/tflock_generate.sh
+              # update .terraform.lock.hcl
+              tfupdate lock --platform=linux_amd64 --platform=darwin_amd64 --platform=darwin_arm64 -r ./
 
               if git add . && git diff --cached --exit-code --quiet; then
                 echo "No changes"
@@ -189,7 +174,6 @@ jobs:
       - tfupdate_terraform
       - tfupdate_provider:
           provider_name: 'aws'
-          terraform_version: '1.4.6'
 
 workflows:
   version: 2
